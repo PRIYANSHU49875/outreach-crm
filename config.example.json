@@ -1,0 +1,13 @@
+{
+  "_comment": "Copy this file to config.json and fill in your own values. Never commit config.json.",
+  "ownerEmail": "YOUR_EMAIL@gmail.com",
+  "spreadsheetId": "YOUR_GOOGLE_SHEET_ID",
+  "bookingLink": "https://calendar.app.google/YOUR_BOOKING_LINK",
+  "mcpUrl": "http://localhost:8000/mcp",
+  "port": 7070,
+  "profile": {
+    "name": "Your Name",
+    "intro": "One-line intro about you",
+    "skills": "Your key skills"
+  }
+}

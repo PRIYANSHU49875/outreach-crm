@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Goals · Outreach CRM</title>
+<link rel="stylesheet" href="style.css?v=20261120b">
+<style>
+  .goalbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .ring-wrap{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+  .ring{--p:0;width:130px;height:130px;border-radius:50%;flex-shrink:0;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--bg) 0);
+    display:flex;align-items:center;justify-content:center;position:relative}
+  .ring::before{content:"";position:absolute;inset:12px;border-radius:50%;background:var(--surface)}
+  .ring span{position:relative;font-size:26px;font-weight:700}
+  .goalinfo h3{font-size:18px;font-weight:600;margin-bottom:4px}
+  .goalinfo p{color:var(--text-2);font-size:14px}
+  .milestones{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-top:8px}
+  .ms{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+  .ms .n{font-size:24px;font-weight:700}
+  .ms .l{font-size:12px;color:var(--text-3);margin-top:2px}
+  .ms.done{border-color:var(--ok);background:var(--ok-soft)}
+  .ms.done .n{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="nav"></div>
+  <div class="main">
+    <header class="pg"><h1>Goals &amp; Progress</h1><p>Stay consistent, land the role.</p></header>
+    <div id="errBox"></div>
+
+    <div class="goalbox">
+      <div class="ring-wrap">
+        <div class="ring" id="ring"><span id="ringP">0%</span></div>
+        <div class="goalinfo">
+          <h3 id="goalHead">Weekly Goal</h3>
+          <p id="goalDesc"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="goalbox">
+      <div class="cap" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600;margin-bottom:14px">Milestones</div>
+      <div class="milestones" id="milestones"></div>
+    </div>
+
+    <div class="foot">Change your weekly goal by telling your assistant, e.g. "set weekly goal to 15".</div>
+  </div>
+</div>
+<script src="app.js?v=20261120b"></script>
+<script>
+document.getElementById("nav").outerHTML = renderNav("goals.html");
+function renderPage(d){
+  const ml = d.mailLog||[], bk = d.bookings||[], ct = d.contacts||[];
+  const goal = parseInt((d.profile&&d.profile["🎯 Weekly Goal (emails)"])||"10",10)||10;
+  const sent = ml.length;
+  const pct = Math.min(100, Math.round(sent/goal*100));
+  const ring = document.getElementById("ring");
+  setTimeout(()=>ring.style.setProperty("--p",pct),100);
+  document.getElementById("ringP").textContent = pct+"%";
+  document.getElementById("goalDesc").textContent = sent>=goal
+    ? `You've sent ${sent} emails — goal of ${goal} reached! 🎯`
+    : `${sent} of ${goal} emails sent. ${goal-sent} to go this week.`;
+
+  const replied = bk.filter(b=>/replied/i.test(b.reply||"")).length;
+  const booked = bk.filter(b=>b.slot).length;
+  const ms = [
+    [sent,"Emails Sent", sent>0],
+    [ct.length,"Companies", ct.length>0],
+    [replied,"Replies", replied>0],
+    [booked,"Interviews", booked>0],
+    [0,"Offers", false],
+  ];
+  document.getElementById("milestones").innerHTML = ms.map(m=>`
+    <div class="ms ${m[2]?'done':''}"><div class="n">${m[0]}</div><div class="l">${m[1]}</div></div>`).join("");
+}
+loadData().then(renderPage).catch(e=>{document.getElementById("errBox").innerHTML='<div class="err">Could not load data.</div>';});
+window.DASH.startAutoRefresh(renderPage);
+</script>
+</body>
+</html>

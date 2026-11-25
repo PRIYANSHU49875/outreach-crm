@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings · Outreach CRM</title>
+<link rel="stylesheet" href="style.css?v=20261120b">
+</head>
+<body>
+<div class="layout">
+  <div id="nav"></div>
+  <div class="main">
+    <header class="pg"><h1>Settings</h1><p>Data source, links and info.</p></header>
+
+    <div class="card" id="profileCard" style="display:none">
+      <h3>My Pitch Profile</h3>
+      <div class="sub">Reused automatically for every outreach email.</div>
+      <div id="profileRows"></div>
+    </div>
+
+    <div class="card">
+      <h3>Data Source</h3>
+      <div class="sub">This dashboard reads from your Google Sheet.</div>
+      <div class="row"><span class="k">Account</span><b id="owner">—</b></div>
+      <div class="row"><span class="k">Last updated</span><b id="updated">—</b></div>
+      <div class="row"><span class="k">Bookings</span><b id="cBook">0</b></div>
+      <div class="row"><span class="k">Mails logged</span><b id="cMail">0</b></div>
+      <div style="margin-top:16px">
+        <a class="btn ghost" href="https://docs.google.com/spreadsheets/d/1RcLja4_12OEP6ObytwFiLzZLmbG9iZww4xG5ABiGh2c/edit" target="_blank">Open Google Sheet</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Booking Page</h3>
+      <div class="sub">Share this link so people can book a slot with you.</div>
+      <div class="row"><span class="k">Your link</span>
+        <a class="link" href="https://calendar.app.google/VWSPymrNrEKZpDyH7" target="_blank">calendar.app.google/VWSPymrNrEKZpDyH7</a></div>
+      <div style="margin-top:16px">
+        <a class="btn" href="https://calendar.app.google/VWSPymrNrEKZpDyH7" target="_blank">Open Booking Page</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>How to refresh</h3>
+      <div class="sub">The numbers come from a local <code>data.json</code> file.</div>
+      <p style="font-size:14px;color:#52606d">Just tell your assistant <b>"refresh the dashboard"</b> and it will re-read your sheet and update this site. Then hard-refresh the page (Ctrl + Shift + R).</p>
+    </div>
+
+    <div class="foot">Served locally on port 7070 · Built by your AI assistant.</div>
+  </div>
+</div>
+<script src="app.js?v=20261120b"></script>
+<script>
+document.getElementById("nav").outerHTML = renderNav("settings.html");
+loadData().then(d=>{
+  document.getElementById("owner").textContent = d.owner||"—";
+  document.getElementById("updated").textContent = d.generatedAt?new Date(d.generatedAt).toLocaleString():"—";
+  document.getElementById("cBook").textContent = (d.bookings||[]).length;
+  document.getElementById("cMail").textContent = (d.mailLog||[]).length;
+
+  const p = d.profile||{};
+  const keys = Object.keys(p);
+  if(keys.length){
+    document.getElementById("profileCard").style.display="block";
+    document.getElementById("profileRows").innerHTML = keys
+      .filter(k=>p[k] && !/^\(/.test(p[k]))
+      .map(k=>`<div class="row"><span class="k">${k}</span><b style="max-width:60%;text-align:right">${p[k]}</b></div>`).join("");
+  }
+}).catch(()=>{});
+</script>
+</body>
+</html>

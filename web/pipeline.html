@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pipeline · Outreach CRM</title>
+<link rel="stylesheet" href="style.css?v=20261120b">
+<style>
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:900px){.board{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.board{grid-template-columns:1fr}}
+  .col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);min-height:160px}
+  .col h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between}
+  .col h3 .ct{background:var(--bg);border-radius:20px;padding:1px 9px;color:var(--text-2)}
+  .pcard{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;transition:.15s}
+  .pcard:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+  .pcard .pn{font-weight:600;font-size:14px}
+  .pcard .pc{font-size:12px;color:var(--text-2);margin-top:2px}
+  .pcard .pd{font-size:11px;color:var(--text-3);margin-top:6px}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="nav"></div>
+  <div class="main">
+    <header class="pg"><h1>Pipeline</h1><p>Your whole job hunt, by stage.</p><div class="meta" id="meta"></div></header>
+    <div id="errBox"></div>
+    <div class="board" id="board"></div>
+    <div class="foot">Stages are inferred from each contact's status. Update status in the Contacts tab or sheet.</div>
+  </div>
+</div>
+<script src="app.js?v=20261120b"></script>
+<script>
+document.getElementById("nav").outerHTML = renderNav("pipeline.html");
+function stageOf(status){
+  const s = (status||"").toLowerCase();
+  if(/offer|hired/.test(s)) return 3;
+  if(/interview|booked|call/.test(s)) return 2;
+  if(/replied/.test(s)) return 1;
+  return 0; // contacted / emailed / default
+}
+function renderPage(d){
+  const ct = d.contacts||[];
+  const bk = d.bookings||[];
+  // Treat bookings as "interview" stage entries too
+  const people = ct.map(c=>({name:c.name,company:c.company,date:c.dateEmailed,stage:stageOf(c.status),status:c.status}));
+  bk.forEach(b=>{ if(!people.find(p=>p.name===b.name)) people.push({name:b.name,company:"",date:b.slot,stage:2,status:"Interview"}); });
+
+  const stages = [
+    ["Contacted","#5b5bd6"],["Replied","#1a7f52"],["Interview","#b4690e"],["Offer","#c0392b"]
+  ];
+  document.getElementById("board").innerHTML = stages.map((st,i)=>{
+    const inStage = people.filter(p=>p.stage===i);
+    return `<div class="col">
+      <h3><span><span class="dot" style="background:${st[1]}"></span>${st[0]}</span><span class="ct">${inStage.length}</span></h3>
+      ${inStage.map(p=>`<div class="pcard"><div class="pn">${p.name}</div>
+        ${p.company?`<div class="pc">${p.company}</div>`:""}
+        <div class="pd">${p.date||""}</div></div>`).join("") || '<p class="empty" style="padding:2px;font-size:13px">—</p>'}
+    </div>`;
+  }).join("");
+  document.getElementById("meta").textContent = d.generatedAt?("Updated "+new Date(d.generatedAt).toLocaleString()):"";
+}
+loadData().then(renderPage).catch(e=>{document.getElementById("errBox").innerHTML='<div class="err">Could not load data.</div>';});
+window.DASH.startAutoRefresh(renderPage);
+</script>
+</body>
+</html>

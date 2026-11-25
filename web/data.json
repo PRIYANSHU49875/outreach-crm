@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-11-26T10:00:00+05:30",
+  "owner": "demo@example.com",
+  "demo": true,
+  "bookings": [
+    {
+      "name": "Alex Recruiter",
+      "slot": "28 Nov · 3:00–3:15 PM",
+      "reply": "Replied",
+      "replyMessage": "Sounds great, talk soon!",
+      "meetingLink": "https://meet.google.com/demo-link",
+      "status": "🟢 Scheduled",
+      "isPast": false
+    }
+  ],
+  "mailLog": [
+    {
+      "name": "Alex Recruiter",
+      "email": "alex@acme.com",
+      "subject": "Ex-Groww growth intern → Acme?",
+      "message": "Hi Alex,\n\nI'm a final-year student and ex-Growth Intern. I'd love to connect about any growth/marketing openings at Acme.\n\nQuick 15 min? → [booking link]\n\nThanks!",
+      "dateSent": "26 Nov 2026",
+      "status": "Sent",
+      "type": "Cold"
+    },
+    {
+      "name": "Sam Lead",
+      "email": "sam@beta.io",
+      "subject": "Quick chat about growth at Beta?",
+      "message": "Hi Sam,\n\nFollowing up on my earlier note...",
+      "dateSent": "25 Nov 2026",
+      "status": "Sent",
+      "type": "Follow-up"
+    }
+  ],
+  "contacts": [
+    {
+      "name": "Alex Recruiter",
+      "email": "alex@acme.com",
+      "company": "Acme",
+      "role": "Recruiter",
+      "dateEmailed": "26 Nov 2026",
+      "status": "↩️ Replied",
+      "intel": "Acme is a fast-growing SaaS startup actively hiring for growth roles. Strong fit for your pitch."
+    },
+    {
+      "name": "Sam Lead",
+      "email": "sam@beta.io",
+      "company": "Beta",
+      "role": "Hiring Manager",
+      "dateEmailed": "25 Nov 2026",
+      "status": "📧 Emailed",
+      "intel": ""
+    }
+  ],
+  "profile": { "🎯 Weekly Goal (emails)": "10" },
+  "analytics": {
+    "byType": { "Cold": 1, "Follow-up": 1 },
+    "bySubject": { "Ex-Groww growth intern → Acme?": { "sent": 1 }, "Quick chat about growth at Beta?": { "sent": 1 } },
+    "funnel": { "sent": 2, "replied": 1, "booked": 1 }
+  }
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Overview · Outreach CRM</title>
+<link rel="stylesheet" href="style.css?v=20261120b">
+<style>
+  .hero{background:#1a1a1f;color:#ffffff;border-radius:var(--radius);padding:24px 28px;margin-bottom:24px;box-shadow:var(--shadow-lg)}
+  .hero h2{font-size:18px;font-weight:600;margin-bottom:5px;letter-spacing:-0.02em}
+  .hero p{opacity:.7;font-size:14px}
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-bottom:18px}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .box h3{font-size:14px;font-weight:600;margin-bottom:16px;color:var(--text);letter-spacing:-0.01em}
+  .box .cap{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600;margin-bottom:14px}
+  /* funnel */
+  .fstep{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  .fstep:last-child{margin-bottom:0}
+  .fbar{height:28px;border-radius:7px;display:flex;align-items:center;padding:0 12px;color:#fff;font-weight:600;font-size:13px;min-width:40px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .flabel{width:66px;font-size:13px;color:var(--text-2)}
+  /* streak */
+  .streak{text-align:center;padding:6px 0}
+  .streak .big{font-size:44px;font-weight:700;letter-spacing:-0.03em;line-height:1}
+  .streak .lbl{color:var(--text-3);font-size:13px;margin-top:4px}
+  .progress{height:8px;background:#f1f1f4;border-radius:5px;margin-top:16px;overflow:hidden}
+  .progress .fill{height:100%;background:var(--accent);border-radius:5px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+  .goaltxt{font-size:13px;color:var(--text-2);margin-top:10px;text-align:center}
+  /* hit list */
+  .hit{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+  .hit:last-child{border:none}
+  .hit .who{font-size:14px;font-weight:500}
+  .hit .who small{color:var(--text-3);display:block;font-size:12px;font-weight:400;margin-top:1px}
+  /* intel */
+  .intel{border-left:2px solid var(--accent);padding:4px 0 4px 14px;margin-bottom:14px}
+  .intel:last-child{margin-bottom:0}
+  .intel .cn{font-weight:600;font-size:14px}
+  .intel .ci{font-size:13px;color:var(--text-2);margin-top:4px;line-height:1.55}
+  .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .mini .m{background:var(--bg);border-radius:10px;padding:14px;text-align:center}
+  .mini .m b{font-size:22px;display:block;font-weight:700;letter-spacing:-0.02em}
+  .mini .m span{font-size:11px;color:var(--text-3)}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="nav"></div>
+  <div class="main">
+    <header class="pg"><h1>Overview</h1><p>Your outreach, coached.</p><div class="meta" id="meta">Loading…</div></header>
+    <div id="errBox"></div>
+
+    <div class="hero"><h2 id="heroTitle">…</h2><p id="heroSub"></p></div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="grid2">
+      <div class="box"><div class="cap">Today's Hit List</div><div id="hitlist"></div></div>
+      <div class="box"><div class="cap">Weekly Goal</div>
+        <div class="streak">
+          <div class="big" id="goalCount">0</div>
+          <div class="lbl">emails sent this week</div>
+          <div class="progress"><div class="fill" id="goalFill" style="width:0"></div></div>
+          <div class="goaltxt" id="goalTxt"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="box"><div class="cap">Outreach Funnel</div><div id="funnel"></div></div>
+      <div class="box"><div class="cap">Company Intel</div><div id="intel"></div></div>
+    </div>
+
+    <div class="box"><div class="cap">What's Working</div><div id="whatsWorking"></div></div>
+
+    <div class="foot">Served locally · auto-refreshing</div>
+  </div>
+</div>
+
+<script src="app.js?v=20261120b"></script>
+<script>
+document.getElementById("nav").outerHTML = renderNav("index.html");
+
+function renderPage(d){
+  const s = stats(d);
+  const bk = d.bookings||[], ml = d.mailLog||[], ct = d.contacts||[];
+
+  document.getElementById("stats").innerHTML = [
+    [s.sent,"Mails Sent"],[ct.length,"Contacts"],[s.replied,"Replies"],
+    [s.booked,"Booked"],[s.rate+"%","Reply Rate"]
+  ].map(x=>`<div class="stat"><div class="num">${x[0]}</div><div class="lbl">${x[1]}</div></div>`).join("");
+
+  const needFollowup = ct.filter(c=>/emailed/i.test(c.status||"") && !/replied|booked/i.test(c.status||""));
+  let title, sub;
+  if(needFollowup.length){ title=`${needFollowup.length} contact${needFollowup.length>1?'s':''} awaiting a follow-up`; sub=`Following up with non-repliers can double your reply rate. Ask: "send follow-ups".`; }
+  else if(ct.length===0){ title="Let's get started"; sub="Paste a recruiter list to send your first batch."; }
+  else { title="You're all caught up"; sub="Add more recruiters to keep the momentum going."; }
+  document.getElementById("heroTitle").textContent = title;
+  document.getElementById("heroSub").textContent = sub;
+
+  const hits = [];
+  needFollowup.forEach(c=>hits.push({who:c.name,sub:(c.company||c.email)+" · awaiting reply",act:"Follow up"}));
+  bk.filter(b=>b.slot&&!b.isPast&&!/cancelled/i.test(b.status||"")).forEach(b=>hits.push({who:b.name,sub:b.slot+" · upcoming call",act:"Prep"}));
+  bk.filter(b=>/confirm/i.test(b.status||"")).forEach(b=>hits.push({who:b.name,sub:b.slot+" · mark outcome",act:"Confirm"}));
+  document.getElementById("hitlist").innerHTML = hits.length
+    ? hits.slice(0,6).map(h=>`<div class="hit"><div class="who">${h.who}<small>${h.sub}</small></div><span class="tag">${h.act}</span></div>`).join("")
+    : '<p class="empty" style="padding:4px 0">Nothing urgent right now.</p>';
+
+  const goal = parseInt((d.profile&&d.profile["🎯 Weekly Goal (emails)"])||"10",10)||10;
+  const thisWeek = ml.length;
+  document.getElementById("goalCount").textContent = thisWeek;
+  const pct = Math.min(100, Math.round(thisWeek/goal*100));
+  setTimeout(()=>document.getElementById("goalFill").style.width=pct+"%",100);
+  document.getElementById("goalTxt").textContent = thisWeek>=goal ? `Goal reached (${thisWeek}/${goal})` : `${goal-thisWeek} more to reach ${goal}`;
+
+  const f = (d.analytics&&d.analytics.funnel)||{sent:s.sent,replied:s.replied,booked:s.booked};
+  const maxF = Math.max(f.sent,1);
+  const steps = [["Sent",f.sent,"#5b5bd6"],["Replied",f.replied,"#1a7f52"],["Booked",f.booked,"#b4690e"]];
+  document.getElementById("funnel").innerHTML = steps.map(st=>`
+    <div class="fstep"><span class="flabel">${st[0]}</span>
+      <div class="fbar" style="width:0;background:${st[2]}" data-w="${Math.max(st[1]/maxF*100,6)}">${st[1]}</div></div>`).join("");
+  setTimeout(()=>document.querySelectorAll('.fbar').forEach(b=>b.style.width=b.dataset.w+"%"),150);
+
+  const withIntel = ct.filter(c=>c.intel && c.intel.trim());
+  document.getElementById("intel").innerHTML = withIntel.length
+    ? withIntel.slice(0,3).map(c=>`<div class="intel"><div class="cn">${c.company||c.name}</div><div class="ci">${c.intel}</div></div>`).join("")
+    : '<p class="empty" style="padding:4px 0">Company intel appears here when you add recruiters.</p>';
+
+  const byType = (d.analytics&&d.analytics.byType)||{};
+  const entries = Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  document.getElementById("whatsWorking").innerHTML = entries.length
+    ? `<div class="mini">${entries.map(e=>`<div class="m"><b>${e[1]}</b><span>${e[0]} emails</span></div>`).join("")}</div>`
+    : '<p class="empty" style="padding:4px 0">Send more emails to see what works best.</p>';
+
+  document.getElementById("meta").textContent = d.generatedAt?("Updated "+new Date(d.generatedAt).toLocaleString()):"";
+}
+loadData().then(renderPage).catch(e=>{
+  document.getElementById("errBox").innerHTML='<div class="err">Could not load data ('+e.message+'). Make sure the live server is running.</div>';
+});
+window.DASH.startAutoRefresh(renderPage);
+</script>
+</body>
+</html>

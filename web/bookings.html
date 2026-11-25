@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bookings · Outreach CRM</title>
+<link rel="stylesheet" href="style.css?v=20261120b">
+</head>
+<body>
+<div class="layout">
+  <div id="nav"></div>
+  <div class="main">
+    <header class="pg"><h1>Bookings</h1><p>Everyone who booked a meeting, with join links.</p></header>
+    <div id="errBox"></div>
+    <table>
+      <thead><tr><th>Name</th><th>Booked Slot</th><th>Status</th><th>Reply</th><th>Join</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="foot">Served locally · Say "refresh the dashboard" to update.</div>
+  </div>
+</div>
+<script src="app.js?v=20261120b"></script>
+<script>
+document.getElementById("nav").outerHTML = renderNav("bookings.html");
+function statusPill(s){
+  s = s || "🟢 Scheduled";
+  let cls = "";
+  if(/attended/i.test(s)) cls="ok";
+  else if(/no-show|cancelled/i.test(s)) cls="wait";
+  else if(/confirm/i.test(s)) cls="wait";
+  return `<span class="tag ${cls}">${s}</span>`;
+}
+function renderPage(d){
+  const bk = d.bookings||[];
+  document.getElementById("rows").innerHTML = bk.map(b=>{
+    const rep = /replied/i.test(b.reply||"");
+    // Hide Join button if cancelled.
+    const cancelled = /cancelled/i.test(b.status||"");
+    const join = cancelled ? `<span class="btn disabled">Cancelled</span>`
+      : b.meetingLink
+        ? `<a class="btn" href="${b.meetingLink}" target="_blank">▶ Join</a>`
+        : `<span class="btn disabled">No link</span>`;
+    return `<tr>
+      <td>${b.name}</td>
+      <td><b>${b.slot||"—"}</b></td>
+      <td>${statusPill(b.status)}</td>
+      <td>${tag(rep?"Replied":"Awaiting", rep?"ok":"wait")}</td>
+      <td>${join}</td></tr>`;
+  }).join("") || '<tr><td colspan="5" class="empty">No bookings yet.</td></tr>';
+}
+loadData().then(renderPage).catch(e=>{
+  document.getElementById("errBox").innerHTML='<div class="err">Could not load data ('+e.message+'). Make sure the live server is running.</div>';
+});
+window.DASH.startAutoRefresh(renderPage);
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interview Prep · Outreach CRM</title>
+<link rel="stylesheet" href="style.css?v=20261120b">
+<style>
+  .prep{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .prep .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .prep .pname{font-weight:600;font-size:16px}
+  .prep .pwhen{font-size:13px;color:var(--text-2)}
+  .prep .intel{background:var(--bg);border-radius:10px;padding:14px;margin:14px 0;font-size:13px;color:var(--text-2);line-height:1.55;border-left:2px solid var(--accent)}
+  .prep .qh{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600;margin:14px 0 8px}
+  .prep ul{margin-left:18px;font-size:14px;color:var(--text);line-height:1.8}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="nav"></div>
+  <div class="main">
+    <header class="pg"><h1>Interview Prep</h1><p>Be ready for every call.</p></header>
+    <div id="errBox"></div>
+    <div id="list"></div>
+    <div class="foot">Prep cards appear for upcoming meetings. Company intel comes from your Contacts.</div>
+  </div>
+</div>
+<script src="app.js?v=20261120b"></script>
+<script>
+document.getElementById("nav").outerHTML = renderNav("prep.html");
+const GENERIC_QS = [
+  "Why are you interested in growth/marketing at this company?",
+  "Walk me through a growth experiment you ran at Groww.",
+  "How would you improve our user acquisition?",
+  "What metrics do you focus on, and why?",
+  "Tell me about a time data changed your decision."
+];
+function renderPage(d){
+  const bk = (d.bookings||[]).filter(b=>b.slot && !b.isPast && !/cancelled/i.test(b.status||""));
+  const ct = d.contacts||[];
+  if(!bk.length){
+    document.getElementById("list").innerHTML = '<div class="prep"><p class="empty" style="padding:4px 0">No upcoming meetings to prep for. When a recruiter books a call, a prep card appears here.</p></div>';
+    return;
+  }
+  document.getElementById("list").innerHTML = bk.map(b=>{
+    const contact = ct.find(c=>c.name===b.name || (c.email&&b.email&&c.email===b.email));
+    const intel = contact && contact.intel ? contact.intel : "No company intel yet — ask your assistant to research this company.";
+    const company = contact && contact.company ? contact.company : b.name;
+    return `<div class="prep">
+      <div class="ph"><div class="pname">${b.name}</div><div class="pwhen">${b.slot}</div></div>
+      <div class="qh">Company Intel</div>
+      <div class="intel">${intel}</div>
+      <div class="qh">Likely Questions</div>
+      <ul>${GENERIC_QS.map(q=>`<li>${q.replace("this company",company).replace("our ",company+"'s ")}</li>`).join("")}</ul>
+    </div>`;
+  }).join("");
+}
+loadData().then(renderPage).catch(e=>{document.getElementById("errBox").innerHTML='<div class="err">Could not load data.</div>';});
+window.DASH.startAutoRefresh(renderPage);
+</script>
+</body>
+</html>

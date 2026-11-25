@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mail · Outreach CRM</title>
+<link rel="stylesheet" href="style.css?v=20261120b">
+<style>.search{width:100%;max-width:340px;padding:10px 13px;border:1px solid #cdd5de;border-radius:8px;font-size:14px;margin-bottom:16px;outline:none}
+.search:focus{border-color:#3e6ae1}</style>
+</head>
+<body>
+<div class="layout">
+  <div id="nav"></div>
+  <div class="main">
+    <header class="pg"><h1>Mail Log</h1><p>Every email sent, with its personalised message.</p></header>
+    <div id="errBox"></div>
+    <input class="search" id="search" placeholder="Search name, email, type or status…">
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Subject</th><th>Type</th><th>Status</th><th>Sent</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="foot">Served locally · Click “View” to read the full message.</div>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="mbox">
+  <h3 id="mName"></h3><div class="me" id="mEmail"></div><div class="body" id="mBody"></div>
+  <button class="mbtn" onclick="closeModal()">Close</button></div></div>
+
+<script src="app.js?v=20261120b"></script>
+<script>
+document.getElementById("nav").outerHTML = renderNav("mail.html");
+let ALL = [];
+function draw(list){
+  document.getElementById("rows").innerHTML = list.map((m,i)=>`<tr>
+    <td>${m.name}</td><td class="email">${m.email}</td>
+    <td>${m.subject}</td><td>${tag(m.type)}</td><td>${tag(m.status,"ok")}</td>
+    <td class="email">${m.dateSent}</td>
+    <td><span class="link" data-i="${i}">View</span></td>
+  </tr>`).join("") || '<tr><td colspan="7" class="empty">No mail sent yet.</td></tr>';
+  document.querySelectorAll('#rows .link').forEach(el=>{
+    el.addEventListener('click',()=>{const m=list[el.dataset.i];
+      openModal(m.subject,"To: "+m.name+" · "+m.email,m.message);});
+  });
+}
+function applySearch(){
+  const q=document.getElementById("search").value.toLowerCase();
+  draw(ALL.filter(m=>(m.name+m.email+m.type+m.status+m.subject).toLowerCase().includes(q)));
+}
+function renderPage(d){ ALL = d.mailLog||[]; applySearch(); }
+loadData().then(d=>{ renderPage(d);
+  document.getElementById("search").addEventListener("input",applySearch);
+}).catch(e=>{
+  document.getElementById("errBox").innerHTML='<div class="err">Could not load data ('+e.message+'). Make sure the live server is running.</div>';
+});
+window.DASH.startAutoRefresh(renderPage);
+</script>
+</body>
+</html>

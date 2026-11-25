@@ -1,0 +1,15 @@
+# Secrets — NEVER commit these
+config.json
+client_secret*.json
+*.credentials
+.credentials/
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
